@@ -65,8 +65,19 @@ def show_shopping_cart():
     # The logic here will be something like:
     #
     # - get the cart dictionary from the session
+
+    if "cart" in session:
+        cart = session["cart"]
+    else:
+        cart = session["cart"] = {}
+
+    session["cart"] = cart
+
     # - create a list to hold melon objects and a variable to hold the total
     #   cost of the order
+    melon_in_cart = []
+    total_cost = 0
+
     # - loop over the cart dictionary, and for each melon id:
     #    - get the corresponding Melon object
     #    - compute the total cost for that type of melon
@@ -74,11 +85,23 @@ def show_shopping_cart():
     #    - add quantity and total cost as attributes on the Melon object
     #    - add the Melon object to the list created above
     # - pass the total order cost and the list of Melon objects to the template
+
+  
+    for melon_id, count in cart.items():
+        melon = Melons.get_by_id(melon_id)
+        total_cost = count * melon.price
+        order_total += total_cost
+        melon_in_cart.append(melon)
+    
+    return render_template("cart.html",
+                           cart=melon_in_cart,
+                           order_total=order_total)
+       
     #
     # Make sure your function can also handle the case wherein no cart has
     # been added to the session
 
-    return render_template("cart.html")
+    # return render_template("cart.html")
 
 
 @app.route("/add_to_cart/<melon_id>")
@@ -95,6 +118,9 @@ def add_to_cart(melon_id):
     #
     # - check if a "cart" exists in the session, and create one (an empty
     #   dictionary keyed to the string "cart") if not
+
+    # session = {"cart": {melon_id: count}}
+
     if "cart" in session:
         cart = session["cart"]
     else:
@@ -107,13 +133,13 @@ def add_to_cart(melon_id):
     else:
         cart[melon_id] = 1
 
+    # This is a dictionary example :
     # if word in word_counts:
-    #         word_counts[word] += 1
-    #     else:
-    #         word_counts[word] = 1
+    #     word_counts[word] += 1
+    # else:
+    #     word_counts[word] = 1
 
    
-
     # - flash a success message
     flash("Success added!")
 
@@ -122,8 +148,6 @@ def add_to_cart(melon_id):
 
 
     # return render_template("cart.html")
-
-
 
 
 
